@@ -401,7 +401,44 @@ with col_result:
             st.download_button("⬇ Download", data=report_text, file_name="report.txt", mime="text/plain", use_container_width=True)
         with act2:
             if st.button("💾 Save Record"):
-                st.success("Saved!")
+                try:
+                    import mysql.connector
+                    conn = mysql.connector.connect(
+                        host="localhost",
+                        user="root",
+                        password="upgrad", 
+                        database="stroke_db"        
+                    )
+                    cursor = conn.cursor()
+                    
+                    query = """
+                        INSERT INTO patient_assessments 
+                        (gender, age, hypertension, heart_disease, ever_married, work_type, Residence_type, avg_glucose_level, bmi, smoking_status, stroke_probability, risk_status) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    
+                    values = (
+                        gender,
+                        int(age),
+                        hypertension_ui,
+                        heart_disease_ui,
+                        ever_married,
+                        work_type,
+                        residence_ui,
+                        float(avg_glucose_level),
+                        float(bmi),
+                        smoking_status,
+                        float(p),
+                        r_title
+                    )
+                    
+                    cursor.execute(query, values)
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
+                    st.success("Record saved to MySQL successfully!")
+                except Exception as db_err:
+                    st.error(f"Database Error: {db_err}")
         with act3:
             if st.button("🔄 New"):
                 st.session_state.prediction_made = False
